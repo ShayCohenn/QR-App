@@ -47,7 +47,7 @@ python .\main.py
 ## How to use
 
 ### Basic usage:
-<img src="screenshots/usage.gif"><br>
+<img src="gifs/usage.gif"><br>
 
 ### Scanning QR codes: 
-<img src="screenshots/scanning.gif">
+<img src="gifs/scanning.gif">
