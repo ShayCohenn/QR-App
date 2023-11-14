@@ -28,8 +28,10 @@ class MyGUI(QMainWindow):
 
     # Open a file dialog to load an image.    
     def load_image(self):
-        self.timer.stop()
-        self.capture.release()
+        if self.capture is not None:
+            self.timer.stop()
+            self.capture.release()
+            self.label.setText("Load an image of a QR code to read it")
         options = QFileDialog.Options()
 
         # Set the file filter to show only image files
@@ -46,6 +48,9 @@ class MyGUI(QMainWindow):
     # Open a file dialog to save the current image.    
     def save_image(self):
         options = QFileDialog.Option()
+        if self.current_file == "":
+            QMessageBox.critical(self, "Error", "There is no image to save.")
+            return
         filename, _ = QFileDialog.getSaveFileName(self, "Save File", "", "PNG (*.png)",
                                                   options=options)
         if filename != "":
@@ -54,8 +59,9 @@ class MyGUI(QMainWindow):
 
     # Generate a QR code based on the text in the text edit.    
     def generate_code(self):
-        self.timer.stop()
-        self.capture.release()
+        if self.capture is not None:
+            self.timer.stop()
+            self.capture.release()
         qr = qrcode.QRCode(version=1,
                            error_correction=qrcode.constants.ERROR_CORRECT_L,
                            box_size=20,
