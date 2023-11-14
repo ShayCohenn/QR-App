@@ -1,6 +1,6 @@
 # QR Code Reader/Generator Application
 
-This is a simple PyQt5 and OpenCV application for generating and reading QR codes. It allows users to load an image, generate a QR code from text, and read QR codes from images.
+This is a simple PyQt5 and OpenCV application for generating and reading QR codes. It allows users to load an image, generate a QR code from text, read QR codes from images and scan for QR codes using a camera.
 
 ## Features
 
@@ -8,6 +8,7 @@ This is a simple PyQt5 and OpenCV application for generating and reading QR code
 - Generate a QR code from entered text.
 - Save the generated QR code as a PNG image.
 - Read QR codes from loaded images.
+- Read QR codes from a camera.
 
 ## Packages used:
 
@@ -20,7 +21,7 @@ This is a simple PyQt5 and OpenCV application for generating and reading QR code
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/qr_reader_generator.git
+git clone https://github.com/ShayCohenn/QR-App.git
 ```
 2. cd into the folder
 ```bash

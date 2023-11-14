@@ -2,8 +2,9 @@ import sys
 import cv2
 import qrcode
 
-from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox
 from PyQt5 import uic, QtGui
+from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox
+from PyQt5.QtCore import Qt, QTimer
 
 # Main application window class.
 class MyGUI(QMainWindow):
@@ -19,16 +20,21 @@ class MyGUI(QMainWindow):
         self.actionQuit.triggered.connect(self.quit_program)
         self.generateButton.clicked.connect(self.generate_code)
         self.readButton.clicked.connect(self.read_code)
+        self.scanButton.clicked.connect(self.scan_qr)
+
+        self.capture = None
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.scan_qr)
 
     # Open a file dialog to load an image.    
     def load_image(self):
+        self.timer.stop()
+        self.capture.release()
         options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog  # Ensure the filter works on all platforms
 
         # Set the file filter to show only image files
-        filename, _ = QFileDialog.getOpenFileName(self, "Open File", "",
-                                                  "Images (*.png *.jpg *.jpeg);",
-                                                  options=options)
+        filename, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Images (*.png *.jpg *.jpeg);",
+                                              options=options)
 
         if filename != "":
             self.current_file = filename
@@ -48,6 +54,8 @@ class MyGUI(QMainWindow):
 
     # Generate a QR code based on the text in the text edit.    
     def generate_code(self):
+        self.timer.stop()
+        self.capture.release()
         qr = qrcode.QRCode(version=1,
                            error_correction=qrcode.constants.ERROR_CORRECT_L,
                            box_size=20,
@@ -77,6 +85,34 @@ class MyGUI(QMainWindow):
             return
 
         self.textEdit.setText(data)
+
+    def scan_qr(self):
+        if not self.capture or not self.capture.isOpened():
+            # Open the camera only if it's not already open
+            self.capture = cv2.VideoCapture(0)
+            self.timer.start(100)  # Set timer interval for scanning
+
+        ret, frame = self.capture.read()
+        if ret:
+            frame = cv2.resize(frame, (frame.shape[1] // 2, frame.shape[0] // 2))
+            # Convert the OpenCV image to Qt image format
+            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
+            height, width, channel = rgb_frame.shape
+            bytes_per_line = 3 * width
+            q_image = QtGui.QImage(rgb_frame.data, width, height, bytes_per_line, QtGui.QImage.Format_RGB888)
+            q_pixmap = QtGui.QPixmap.fromImage(q_image)
+
+            # Display the camera feed in the label
+            self.label.setScaledContents(True)
+            self.label.setPixmap(q_pixmap)
+
+            # Attempt to decode QR code
+            detector = cv2.QRCodeDetector()
+            data, _, _ = detector.detectAndDecode(frame)
+
+            if data:
+                # Display the decoded text
+                self.textEdit.setText(data)
 
     # Quit the application.
     def quit_program(self):
